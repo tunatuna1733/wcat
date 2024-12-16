@@ -1,10 +1,12 @@
 use api::ApiClient;
-use league::format_game_data;
+use config::{get_config, set_language_to_config};
+use error::{ApplicationError, ConfigError, QueryError, SetLangError};
 use models::current_game::CurrentGameData;
 use tauri::{async_runtime::Mutex, Manager, State};
 
 mod api;
-mod league;
+mod config;
+mod error;
 mod models;
 
 #[derive(Default)]
@@ -13,24 +15,54 @@ struct AppState {
 }
 
 #[tauri::command]
-async fn initialize(state: State<'_, Mutex<AppState>>) -> Result<(), String> {
+async fn initialize(state: State<'_, Mutex<AppState>>) -> Result<(), QueryError> {
     let mut state = state.lock().await;
-    match state.api_client.initialize().await {
-        Ok(_) => Ok(()),
-        Err(e) => Err(format!(
-            "Initialize error. Status: {:?} {:?}",
-            e.status(),
-            e
-        )),
+    state.api_client.initialize().await
+}
+
+#[tauri::command]
+async fn get_game_state(
+    state: State<'_, Mutex<AppState>>,
+) -> Result<CurrentGameData, ApplicationError> {
+    let state = state.lock().await;
+    let lang = match get_config() {
+        Ok(l) => l.language,
+        Err(_) => {
+            return Err(ApplicationError::Config(ConfigError {
+                message: "Failed to get language from config file.".to_string(),
+            }))
+        }
+    };
+    state.api_client.get_current_game(&lang).await
+}
+
+#[tauri::command]
+async fn set_language(state: State<'_, Mutex<AppState>>, lang: String) -> Result<(), SetLangError> {
+    let state = state.lock().await;
+    if let Some(ref languages) = state.api_client.languages {
+        if !languages.contains(&lang) {
+            return Err(SetLangError {
+                message: "Language not found.".to_string(),
+            });
+        }
+        match set_language_to_config(lang) {
+            Ok(_) => Ok(()),
+            Err(_) => Err(SetLangError {
+                message: "Failed to set language to config.".to_string(),
+            }),
+        }
+    } else {
+        Err(SetLangError {
+            message: "Languages definition not found.".to_string(),
+        })
     }
 }
 
 #[tauri::command]
-async fn get_game_state(state: State<'_, Mutex<AppState>>) -> Result<CurrentGameData, String> {
-    let state = state.lock().await;
-    match state.api_client.get_current_game().await {
-        Ok(r) => Ok(format_game_data(r)),
-        Err(e) => Err(format!("Query error. Status: {:?} {:?}", e.status(), e)),
+async fn get_language() -> Result<String, ()> {
+    match get_config() {
+        Ok(c) => Ok(c.language),
+        Err(_) => Err(()),
     }
 }
 
@@ -39,7 +71,12 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![initialize, get_game_state])
+        .invoke_handler(tauri::generate_handler![
+            initialize,
+            get_game_state,
+            set_language,
+            get_language
+        ])
         .setup(|app| {
             app.manage(Mutex::new(AppState::default()));
             Ok(())

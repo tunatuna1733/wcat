@@ -22,11 +22,45 @@ pub enum Lane {
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct ChampionData {
+    pub id: String,
+    pub key: i32,
+    pub portrait_img: String,
+    pub passive: Passive,
+    pub spells: Vec<Spell>,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Passive {
+    pub name: String,
+    pub icon_img: String,
+    pub video_url: String,
+    pub description: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Spell {
+    pub spell_key: String,
+    pub name: String,
+    pub icon_img: String,
+    pub video_url: String,
+    pub costs: Vec<f32>,
+    pub cooldowns: Vec<f32>,
+    pub description: String,
+    pub dynamic_description: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct PlayerData {
     pub riot_id: String,
     pub position: Lane,
     pub champion_id: String,
     pub champion_name: String,
+    pub champion_data: ChampionData,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]

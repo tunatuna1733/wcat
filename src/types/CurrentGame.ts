@@ -5,6 +5,7 @@ export type PlayerData = {
 	position: Lane;
 	championId: string;
 	championName: string;
+	championData: ChampionData;
 };
 
 export type CurrentGame = {
@@ -13,4 +14,30 @@ export type CurrentGame = {
 		blue: PlayerData[];
 		red: PlayerData[];
 	};
+};
+
+export type ChampionData = {
+	id: string;
+	key: number;
+	portrait_img: string;
+	passive: Passive;
+	spells: Spell[];
+};
+
+type Passive = {
+	name: string;
+	iconImg: string;
+	videoUrl: string;
+	description: string;
+};
+
+type Spell = {
+	spellKey: string;
+	name: string;
+	iconImg: string;
+	videoUrl: string;
+	costs: number[];
+	cooldowns: number[];
+	description: string;
+	dynamicDescription: string;
 };
