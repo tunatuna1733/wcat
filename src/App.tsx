@@ -1,11 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import './App.css';
 import type { CurrentGame } from './types/CurrentGame';
+import Config from './features/Config';
 
 function App() {
 	const [currentGame, setCurrentGame] = useState<CurrentGame>();
-	const [lang, setLang] = useState('');
 
 	useEffect(() => {
 		invoke<void>('initialize');
@@ -24,26 +24,9 @@ function App() {
 		};
 	}, []);
 
-	const handleSetLangClick = useCallback(async () => {
-		try {
-			await invoke<void>('set_language', { lang });
-		} catch (e) {
-			console.error(e);
-		}
-	}, [lang]);
-
 	return (
-		<main className="container">
-			<input
-				value={lang}
-				onChange={(e) => {
-					setLang(e.target.value);
-				}}
-			/>
-			<button onClick={handleSetLangClick} type="button">
-				Set Lang
-			</button>
-			<p>{JSON.stringify(currentGame, null, 4)}</p>
+		<main className="flex min-h-screen flex-col items-center justify-center p-24">
+			<Config />
 		</main>
 	);
 }
