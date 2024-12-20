@@ -19,7 +19,7 @@ export type CurrentGame = {
 export type ChampionData = {
 	id: string;
 	key: number;
-	portrait_img: string;
+	portraitImg: string;
 	passive: Passive;
 	spells: Spell[];
 };

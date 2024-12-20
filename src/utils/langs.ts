@@ -1,4 +1,4 @@
-const languages = [
+export const languages = [
 	{
 		lang: '日本語',
 		code: 'ja_JP',
