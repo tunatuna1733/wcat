@@ -1,9 +1,10 @@
 import { AutoComplete } from '@/components/auto-complete';
 import useChampionsStore from '@/stores/Champions';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import PlayerChampion from './PlayerChampion';
 import { invoke } from '@tauri-apps/api/core';
 import type { ChampionData } from '@/types/CurrentGame';
+import { Label } from '@/components/ui/label';
 
 const Search = () => {
 	const [searchText, setSearchText] = useState('');
@@ -25,14 +26,9 @@ const Search = () => {
 	);
 
 	const handleSelectValue = async (value: string) => {
-		console.log('handleSelectValue', value);
 		setSelectedText(value);
 		await onSelectValue(value);
 	};
-
-	useEffect(() => {
-		console.log(selectedChampion);
-	}, [selectedChampion]);
 
 	const filterFunction = useCallback((item: { value: string; label: string }, inputText: string) => {
 		return (
@@ -43,6 +39,9 @@ const Search = () => {
 
 	return (
 		<div className="w-full">
+			<Label htmlFor="search-champion-input" className="text-lg">
+				Champion search
+			</Label>
 			<AutoComplete
 				selectedValue={selectedText}
 				onSelectedValueChange={handleSelectValue}
@@ -52,6 +51,7 @@ const Search = () => {
 				isLoading={champions.length === 0}
 				emptyMessage="No champion found."
 				filterFunction={filterFunction}
+				id="search-champion-input"
 			/>
 			{selectedChampion && <PlayerChampion champion={selectedChampion} />}
 		</div>
@@ -59,3 +59,7 @@ const Search = () => {
 };
 
 export default Search;
+
+// TODO
+// emit lang change event from rust and listen to it in this component
+// so that we can lively update the lore language

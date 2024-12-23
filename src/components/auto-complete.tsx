@@ -19,6 +19,7 @@ type Props<T extends string> = {
 	emptyMessage?: string;
 	placeholder?: string;
 	filterFunction?: (item: { value: T; label: string }, inputText: string) => boolean;
+	id?: string;
 };
 
 export function AutoComplete<T extends string>({
@@ -31,6 +32,7 @@ export function AutoComplete<T extends string>({
 	emptyMessage = 'No items.',
 	placeholder = 'Search...',
 	filterFunction,
+	id,
 }: Props<T>) {
 	const [open, setOpen] = useState(false);
 
@@ -67,7 +69,7 @@ export function AutoComplete<T extends string>({
 	};
 
 	return (
-		<div className="flex items-center">
+		<div className="flex items-center" id={id}>
 			<Popover open={open} onOpenChange={setOpen}>
 				<Command shouldFilter={false}>
 					<PopoverAnchor asChild>
