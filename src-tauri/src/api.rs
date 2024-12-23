@@ -96,19 +96,21 @@ impl ApiClient {
             Ok(res) => match res.json::<AllGameData>().await {
                 Ok(r) => r,
                 Err(err) => {
-                    return Err(ApplicationError::Query(QueryError {
+                    return Err(QueryError {
                         status: err.status().map(|s| s.as_u16()),
                         message: Some("Failed to parse current game data into json.".to_string()),
                         url: err.url().map(|u| u.to_string()),
-                    }))
+                    }
+                    .into())
                 }
             },
             Err(err) => {
-                return Err(ApplicationError::Query(QueryError {
+                return Err(QueryError {
                     status: err.status().map(|s| s.as_u16()),
                     message: Some("Failed to fetch current game data.".to_string()),
                     url: err.url().map(|u| u.to_string()),
-                }))
+                }
+                .into())
             }
         };
         let formatted_data = self.format_game_data(data, lang).await?;
@@ -145,6 +147,53 @@ impl ApiClient {
         Ok(data)
     }
 
+    pub fn format_champion_data(data: &RawChampionData) -> ChampionData {
+        let spells: Vec<Spell> = data
+            .spells
+            .iter()
+            .map(|s| Spell {
+                name: s.name.clone(),
+                spell_key: s.spell_key.clone(),
+                icon_img: format!(
+                    "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default{}",
+                    s.ability_icon_path.replace("/lol-game-data/assets", "").to_lowercase()
+                ),
+                video_url: format!(
+                    "https://d28xe8vt774jo5.cloudfront.net/{}",
+                    s.ability_video_path
+                ),
+                description: s.description.clone(),
+                dynamic_description: s.dynamic_description.clone(),
+                costs: s.cost_coefficients.clone(),
+                cooldowns: s.cooldown_coefficients.clone(),
+            })
+            .collect();
+        let passive = Passive {
+            name: data.passive.name.clone(),
+            icon_img: format!(
+                "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default{}",
+                data.passive.ability_icon_path.replace("/lol-game-data/assets", "").to_lowercase()
+            ),
+            video_url: format!(
+                "https://d28xe8vt774jo5.cloudfront.net/{}",
+                data.passive.ability_video_path
+            ),
+            description: data.passive.description.clone(),
+        };
+        let champion_data = ChampionData {
+            id: data.alias.clone(),
+            key: data.id.clone(),
+            name: data.name.clone(),
+            portrait_img: format!(
+                "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default{}",
+                data.square_portrait_path.replace("/lol-game-data/assets", "").to_lowercase()
+            ),
+            passive,
+            spells,
+        };
+        champion_data
+    }
+
     pub async fn format_game_data(
         &self,
         data: AllGameData,
@@ -173,50 +222,9 @@ impl ApiClient {
                     let raw_champion_data = match self.get_champion_info(&champion_key, lang).await
                     {
                         Ok(r) => r,
-                        Err(err) => return Err(ApplicationError::Query(err)),
+                        Err(err) => return Err(err.into()),
                     };
-                    let spells: Vec<Spell> = raw_champion_data
-                        .spells
-                        .iter()
-                        .map(|s| Spell {
-                            name: s.name.clone(),
-                            spell_key: s.spell_key.clone(),
-                            icon_img: format!(
-                                "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default{}",
-                                s.ability_icon_path.replace("/lol-game-data/assets", "").to_lowercase()
-                            ),
-                            video_url: format!(
-                                "https://d28xe8vt774jo5.cloudfront.net/{}",
-                                s.ability_video_path
-                            ),
-                            description: s.description.clone(),
-                            dynamic_description: s.dynamic_description.clone(),
-                            costs: s.cost_coefficients.clone(),
-                            cooldowns: s.cooldown_coefficients.clone(),
-                        })
-                        .collect();
-                    let passive = Passive {
-                        name: raw_champion_data.passive.name.clone(),
-                        icon_img: format!(
-                            "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default{}",
-                            raw_champion_data.passive.ability_icon_path.replace("/lol-game-data/assets", "").to_lowercase()
-                        ),
-                        video_url: format!(
-                            "https://d28xe8vt774jo5.cloudfront.net/{}",
-                            raw_champion_data.passive.ability_video_path
-                        ),
-                        description: raw_champion_data.passive.description.clone(),
-                    };
-                    let champion_data = ChampionData {
-                        id: raw_champion_data.alias.clone(),
-                        key: raw_champion_data.id.clone(),
-                        portrait_img: format!(
-                            "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default{}",
-                            raw_champion_data.square_portrait_path.replace("/lol-game-data/assets", "").to_lowercase()
-                        ),
-                        passive,
-                        spells,
-                    };
+                    let champion_data = ApiClient::format_champion_data(&raw_champion_data);
                     let data = PlayerData {
                         riot_id,
                         position,
@@ -242,9 +250,10 @@ impl ApiClient {
 
             Ok(formatted_data)
         } else {
-            Err(ApplicationError::Format(FormatError {
+            Err(FormatError {
                 message: Some("Champion summary data are not fetched.".to_string()),
-            }))
+            }
+            .into())
         }
     }
 }

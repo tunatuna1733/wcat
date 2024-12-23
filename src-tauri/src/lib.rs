@@ -1,7 +1,7 @@
 use api::ApiClient;
 use config::{get_config, set_language_to_config};
 use error::{ApplicationError, ConfigError, QueryError, SetLangError};
-use models::current_game::CurrentGameData;
+use models::current_game::{ChampionData, CurrentGameData};
 use tauri::{async_runtime::Mutex, Manager, State};
 
 mod api;
@@ -34,6 +34,30 @@ async fn get_game_state(
         }
     };
     state.api_client.get_current_game(&lang).await
+}
+
+#[tauri::command]
+async fn get_champion(
+    state: State<'_, Mutex<AppState>>,
+    champion_key: i32,
+) -> Result<ChampionData, QueryError> {
+    let state = state.lock().await;
+    let lang = match get_config() {
+        Ok(c) => c.language,
+        Err(_) => {
+            return Err(QueryError {
+                message: Some("Failed to get language.".to_string()),
+                status: None,
+                url: None,
+            })
+        }
+    };
+    let champion_data = state
+        .api_client
+        .get_champion_info(&champion_key, &lang)
+        .await?;
+    let formatted_champion_data = ApiClient::format_champion_data(&champion_data);
+    Ok(formatted_champion_data)
 }
 
 #[tauri::command]
@@ -74,6 +98,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             initialize,
             get_game_state,
+            get_champion,
             set_language,
             get_language
         ])

@@ -26,6 +26,7 @@ pub enum Lane {
 pub struct ChampionData {
     pub id: String,
     pub key: i32,
+    pub name: String,
     pub portrait_img: String,
     pub passive: Passive,
     pub spells: Vec<Spell>,

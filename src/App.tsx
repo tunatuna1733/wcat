@@ -3,11 +3,12 @@ import { invoke } from '@tauri-apps/api/core';
 import './App.css';
 import type { CurrentGame } from './types/CurrentGame';
 import ConfigModal from './features/ConfigModal';
-import { Radio, Search, Settings } from 'lucide-react';
+import { Radio, Settings, Search as SearchIcon } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import useGameStore from './stores/Game';
 import LiveGame from './features/LiveGame';
+import Search from './features/Search';
 
 function App() {
 	const { setCurrentGame, clearCurrentGame } = useGameStore((state) => state);
@@ -37,7 +38,7 @@ function App() {
 						<LiveGame />
 					</TabsContent>
 					<TabsContent value="search" className="flex mt-0">
-						<p>Search Content</p>
+						<Search />
 					</TabsContent>
 				</div>
 				<div className="border-t flex items-center bg-muted w-full">
@@ -53,7 +54,7 @@ function App() {
 							value="search"
 							className="flex-1 flex flex-col items-center space-y-1 h-full data-[state=active]:bg-background"
 						>
-							<Search className="h-5 w-5" />
+							<SearchIcon className="h-5 w-5" />
 							<span>Search</span>
 						</TabsTrigger>
 					</TabsList>

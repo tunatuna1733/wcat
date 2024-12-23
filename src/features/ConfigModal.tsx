@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { languages } from '@/utils/langs';
 import useConfigStore from '@/stores/Config';
+import useChampionsStore from '@/stores/Champions';
 
 const ConfigModal = ({ children }: { children: (props: { onClick: () => void }) => React.ReactNode }) => {
 	const [isOpen, setIsOpen] = useState(false);
@@ -22,13 +23,14 @@ const ConfigModal = ({ children }: { children: (props: { onClick: () => void }) 
 
 	const { language, setLang } = useConfigStore();
 
-	const handleSetLangClick = async (lang_code: string) => {
+	const handleSetLangClick = async (langCode: string) => {
 		const prevLang = structuredClone(language);
 		try {
-			const lang = languages.find((l) => l.code === lang_code);
+			const lang = languages.find((l) => l.code === langCode);
 			if (lang) {
 				setLang(lang);
-				await invoke<void>('set_language', { lang: lang_code });
+				await invoke<void>('set_language', { lang: langCode });
+				await useChampionsStore.getState().fetch();
 			} else {
 				// show error toast
 			}

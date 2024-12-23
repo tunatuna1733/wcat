@@ -6,7 +6,7 @@ const LiveGame = () => {
 
 	return currentGame ? (
 		<div>
-			<PlayerChampion player={currentGame.teams.blue[0]} />
+			<PlayerChampion champion={currentGame.teams.blue[0].championData} />
 		</div>
 	) : (
 		<p>Game not running</p>

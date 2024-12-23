@@ -1,13 +1,13 @@
-import type { PlayerData } from '@/types/CurrentGame';
+import type { ChampionData } from '@/types/CurrentGame';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallback, useEffect, useState } from 'react';
+import { getFallbackVideoUrl } from '@/utils/league';
 
 type Props = {
-	player: PlayerData;
+	champion: ChampionData;
 };
 
-const PlayerChampion = ({ player }: Props) => {
-	const champion = player.championData;
+const PlayerChampion = ({ champion }: Props) => {
 	const abilities = [
 		{ key: 'P', data: champion.passive },
 		{ key: 'Q', data: champion.spells[0] },
@@ -19,7 +19,6 @@ const PlayerChampion = ({ player }: Props) => {
 	const [tab, setTab] = useState<'P' | 'Q' | 'W' | 'E' | 'R'>('P');
 
 	const keyPress = useCallback((e: KeyboardEvent) => {
-		console.log(e.key);
 		if (e.key === 'p') setTab('P');
 		else if (e.key === 'q') setTab('Q');
 		else if (e.key === 'w') setTab('W');
@@ -37,9 +36,9 @@ const PlayerChampion = ({ player }: Props) => {
 	return (
 		<div className="max-w-full max-h-full min-w-full min-h-full">
 			<div className="flex items-center gap-2 p-4">
-				<img src={champion.portraitImg} alt={player.championName} className="rounded-full w-[48px] h-[48px]" />
+				<img src={champion.portraitImg} alt={champion.name} className="rounded-full w-[48px] h-[48px]" />
 				<div>
-					<h1 className="text-2xl font-bold">{player.championName}</h1>
+					<h1 className="text-2xl font-bold">{champion.name}</h1>
 				</div>
 			</div>
 			<Tabs
@@ -73,7 +72,18 @@ const PlayerChampion = ({ player }: Props) => {
 							<div className="animate-fade-left">
 								<h3 className="text-xl font-bold">{ability.data.name}</h3>
 								<div className="flex">
-									<video className="mt-4 w-2/5 rounded-lg" src={ability.data.videoUrl} controls loop muted autoPlay />
+									<video
+										className="mt-4 w-2/5 rounded-lg"
+										src={
+											ability.data.videoUrl === 'https://d28xe8vt774jo5.cloudfront.net/'
+												? getFallbackVideoUrl(ability.key, champion.key)
+												: ability.data.videoUrl
+										}
+										controls
+										loop
+										muted
+										autoPlay
+									/>
 									<p className="mt-4 ml-4">{ability.data.description}</p>
 								</div>
 							</div>

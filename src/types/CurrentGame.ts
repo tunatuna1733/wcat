@@ -18,6 +18,7 @@ export type CurrentGame = {
 
 export type ChampionData = {
 	id: string;
+	name: string;
 	key: number;
 	portraitImg: string;
 	passive: Passive;
