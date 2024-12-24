@@ -208,6 +208,8 @@ impl ApiClient {
                 let position = player.position.clone();
                 let champion_id = if player.raw_champion_name == "Character_Seraphine_Name" {
                     "Seraphine".to_string()
+                } else if player.raw_champion_name == "Character_Aatrox_Name" {
+                    "Aatrox".to_string()
                 } else {
                     player
                         .raw_champion_name
