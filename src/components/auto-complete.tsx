@@ -3,11 +3,12 @@
 import { cn } from '@/lib/utils';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Check } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { Input } from './ui/input';
 import { Popover, PopoverAnchor, PopoverContent } from './ui/popover';
 import { Skeleton } from './ui/skeleton';
+import useInputStore from '@/stores/Input';
 
 type Props<T extends string> = {
 	selectedValue: T;
@@ -35,6 +36,9 @@ export function AutoComplete<T extends string>({
 	id,
 }: Props<T>) {
 	const [open, setOpen] = useState(false);
+	const inputRef = useRef<HTMLInputElement>(null);
+
+	const setIsInput = useInputStore((state) => state.setIsInput);
 
 	const labels = useMemo(
 		() =>
@@ -66,6 +70,7 @@ export function AutoComplete<T extends string>({
 		onSearchValueChange(labels[inputValue] ?? '');
 
 		setOpen(false);
+		inputRef.current?.blur();
 	};
 
 	return (
@@ -82,7 +87,16 @@ export function AutoComplete<T extends string>({
 							onFocus={() => setOpen(true)}
 							onBlur={onInputBlur}
 						>
-							<Input placeholder={placeholder} />
+							<Input
+								placeholder={placeholder}
+								ref={inputRef}
+								onFocus={() => {
+									setIsInput(true);
+								}}
+								onBlur={() => {
+									setIsInput(false);
+								}}
+							/>
 						</CommandPrimitive.Input>
 					</PopoverAnchor>
 					{!open && <CommandList aria-hidden="true" className="hidden" />}

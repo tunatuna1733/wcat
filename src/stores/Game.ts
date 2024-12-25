@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import type { CurrentGame } from '@/types/CurrentGame';
 
-type GameState = {
+interface GameState {
 	currentGame: CurrentGame | null;
 	setCurrentGame: (game: CurrentGame) => void;
 	clearCurrentGame: () => void;
-};
+}
 
 const useGameStore = create<GameState>()((set) => ({
 	currentGame: null,

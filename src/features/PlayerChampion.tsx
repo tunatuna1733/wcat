@@ -2,6 +2,7 @@ import type { ChampionData } from '@/types/CurrentGame';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallback, useEffect, useState } from 'react';
 import { getFallbackVideoUrl } from '@/utils/league';
+import useInputStore from '@/stores/Input';
 
 type Props = {
 	champion: ChampionData;
@@ -16,14 +17,20 @@ const PlayerChampion = ({ champion }: Props) => {
 	];
 
 	const [tab, setTab] = useState<'P' | 'Q' | 'W' | 'E' | 'R'>('P');
+	const isInput = useInputStore((state) => state.isInput);
 
-	const keyPress = useCallback((e: KeyboardEvent) => {
-		if (e.key === 'p') setTab('P');
-		else if (e.key === 'q') setTab('Q');
-		else if (e.key === 'w') setTab('W');
-		else if (e.key === 'e') setTab('E');
-		else if (e.key === 'r') setTab('R');
-	}, []);
+	const keyPress = useCallback(
+		(e: KeyboardEvent) => {
+			if (!isInput) {
+				if (e.key === 'p') setTab('P');
+				else if (e.key === 'q') setTab('Q');
+				else if (e.key === 'w') setTab('W');
+				else if (e.key === 'e') setTab('E');
+				else if (e.key === 'r') setTab('R');
+			}
+		},
+		[isInput],
+	);
 
 	useEffect(() => {
 		document.addEventListener('keydown', keyPress, false);
@@ -123,7 +130,7 @@ const PlayerChampion = ({ champion }: Props) => {
 										? `${ability.data.costs[0]}`
 										: `${ability.data.costs.slice(0, ability.key === 'R' ? 3 : 5).join(' / ')}`}
 								</p>
-								<div className="flex">
+								<div className="flex items-start">
 									<video
 										className="mt-4 w-2/5 rounded-lg"
 										src={
@@ -136,7 +143,19 @@ const PlayerChampion = ({ champion }: Props) => {
 										muted
 										autoPlay
 									/>
-									<p className="mt-4 ml-4">{ability.data.description}</p>
+									<div>
+										{ability.data.description
+											.split('<br>')
+											.filter((desc) => desc !== '')
+											.map((desc, i, arr) => (
+												<>
+													<p className="mt-4 ml-4" key={`desc-${champion.id}-${i}`}>
+														{desc.replace(/<\/?[\w\s="'#]+>/g, '')}
+													</p>
+													{arr.length !== i && <br />}
+												</>
+											))}
+									</div>
 								</div>
 							</div>
 						</TabsContent>
