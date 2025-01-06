@@ -1,17 +1,19 @@
-import { useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { useEffect, useState } from 'react';
 import './App.css';
-import type { CurrentGame } from './types/CurrentGame';
-import ConfigModal from './features/ConfigModal';
-import { Radio, Settings, Search as SearchIcon } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Radio, Search as SearchIcon, Settings } from 'lucide-react';
 import { Button } from './components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import useGameStore from './stores/Game';
+import ConfigModal from './features/ConfigModal';
 import LiveGame from './features/LiveGame';
 import Search from './features/Search';
+import useGameStore from './stores/Game';
+import type { CurrentGame } from './types/CurrentGame';
 
 function App() {
 	const { setCurrentGame, clearCurrentGame } = useGameStore((state) => state);
+
+	const [tab, setTab] = useState<'live' | 'search'>('live');
 
 	useEffect(() => {
 		invoke<void>('initialize');
@@ -32,12 +34,26 @@ function App() {
 
 	return (
 		<main className="flex h-screen w-full items-center justify-center bg-background">
-			<Tabs defaultValue="live" className="flex flex-col h-full w-full">
+			<Tabs
+				value={tab}
+				onValueChange={(val) => setTab(val as 'live' | 'search')}
+				className="flex flex-col h-full w-full"
+			>
 				<div className="flex-grow p-4 overflow-y-scroll w-full">
-					<TabsContent value="live" className="flex mt-0 w-full">
+					<TabsContent
+						forceMount
+						hidden={tab !== 'live'}
+						value="live"
+						className={`${tab !== 'live' ? 'hidden' : 'flex'} mt-0 w-full`}
+					>
 						<LiveGame />
 					</TabsContent>
-					<TabsContent value="search" className="flex mt-0">
+					<TabsContent
+						forceMount
+						hidden={tab !== 'search'}
+						value="search"
+						className={`${tab !== 'search' ? 'hidden' : 'flex'} mt-0 w-full`}
+					>
 						<Search />
 					</TabsContent>
 				</div>

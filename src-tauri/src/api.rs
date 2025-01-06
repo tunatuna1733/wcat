@@ -206,10 +206,11 @@ impl ApiClient {
             for player in data.all_players.iter() {
                 let riot_id = player.riot_id.clone();
                 let position = player.position.clone();
-                let champion_id = if player.raw_champion_name == "Character_Seraphine_Name" {
-                    "Seraphine".to_string()
-                } else if player.raw_champion_name == "Character_Aatrox_Name" {
-                    "Aatrox".to_string()
+                let champion_id = if player.raw_champion_name.starts_with("Character_") {
+                    player
+                        .raw_champion_name
+                        .replace("Character_", "")
+                        .replace("_Name", "")
                 } else {
                     player
                         .raw_champion_name
@@ -244,6 +245,9 @@ impl ApiClient {
                     continue;
                 }
             }
+
+            blue.sort_by_key(|p| p.position.get_sort_order());
+            red.sort_by_key(|p| p.position.get_sort_order());
 
             let formatted_data = CurrentGameData {
                 my_riot_id,

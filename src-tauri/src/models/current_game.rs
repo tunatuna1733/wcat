@@ -21,6 +21,19 @@ pub enum Lane {
     None,
 }
 
+impl Lane {
+    pub fn get_sort_order(&self) -> u8 {
+        match self {
+            Lane::Top => 0,
+            Lane::Jungle => 1,
+            Lane::Middle => 2,
+            Lane::Bottom => 3,
+            Lane::Utility => 4,
+            Lane::None => 5,
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ChampionData {

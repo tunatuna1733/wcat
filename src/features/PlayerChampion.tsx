@@ -1,8 +1,8 @@
-import type { ChampionData } from '@/types/CurrentGame';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCallback, useEffect, useState } from 'react';
-import { getFallbackVideoUrl } from '@/utils/league';
 import useInputStore from '@/stores/Input';
+import type { ChampionData } from '@/types/CurrentGame';
+import { getFallbackVideoUrl } from '@/utils/league';
+import { useCallback, useEffect, useState } from 'react';
 
 type Props = {
 	champion: ChampionData;
@@ -107,7 +107,7 @@ const PlayerChampion = ({ champion }: Props) => {
 												<p className="mt-4 ml-4" key={`desc-${champion.id}-${i}`}>
 													{desc.replace(/<\/?[\w\s="'#]+>/g, '')}
 												</p>
-												{arr.length !== i && <br />}
+												{arr.length !== i && <br key={`desc-${champion.id}-${i}-br`} />}
 											</>
 										))}
 								</div>
