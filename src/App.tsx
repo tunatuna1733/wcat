@@ -11,16 +11,19 @@ import useGameStore from './stores/Game';
 import type { CurrentGame } from './types/CurrentGame';
 
 function App() {
-	const { setCurrentGame, clearCurrentGame } = useGameStore((state) => state);
+	const { currentGame, setCurrentGame, clearCurrentGame } = useGameStore((state) => state);
 
 	const [tab, setTab] = useState<'live' | 'search'>('live');
 
 	useEffect(() => {
 		invoke<void>('initialize');
+	}, []);
+
+	useEffect(() => {
 		const interval = setInterval(async () => {
 			try {
 				const result = await invoke<CurrentGame>('get_game_state');
-				setCurrentGame(result);
+				if (currentGame !== result) setCurrentGame(result);
 			} catch (e) {
 				// game not running
 				clearCurrentGame();
@@ -30,7 +33,7 @@ function App() {
 		return () => {
 			clearInterval(interval);
 		};
-	}, [setCurrentGame, clearCurrentGame]);
+	}, [currentGame, setCurrentGame, clearCurrentGame]);
 
 	return (
 		<main className="flex h-screen w-full items-center justify-center bg-background">

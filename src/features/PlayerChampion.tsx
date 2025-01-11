@@ -68,7 +68,7 @@ const PlayerChampion = ({ champion }: Props) => {
 						{abilities.map((ability) => (
 							<TabsTrigger
 								value={ability.key}
-								key={ability.key}
+								key={`${ability.key}-trigger`}
 								className={`relative h-16 w-16 overflow-hidden rounded-lg border-2 transition-all p-0 data-[state=active]:border-yellow-400 ${ability.key === 'P' ? 'mr-4' : ''}`}
 							>
 								<div>
@@ -104,10 +104,10 @@ const PlayerChampion = ({ champion }: Props) => {
 										.filter((desc) => desc !== '')
 										.map((desc, i, arr) => (
 											<>
-												<p className="mt-4 ml-4" key={`desc-${champion.id}-${i}`}>
+												<p className="mt-4 ml-4" key={`desc-${champion.id}-p-${i}`}>
 													{desc.replace(/<\/?[\w\s="'#]+>/g, '')}
 												</p>
-												{arr.length !== i && <br key={`desc-${champion.id}-${i}-br`} />}
+												{arr.length !== i && <br key={`desc-${champion.id}-p-${i}-br`} />}
 											</>
 										))}
 								</div>
@@ -149,7 +149,7 @@ const PlayerChampion = ({ champion }: Props) => {
 											.filter((desc) => desc !== '')
 											.map((desc, i, arr) => (
 												<>
-													<p className="mt-4 ml-4" key={`desc-${champion.id}-${i}`}>
+													<p className="mt-4 ml-4" key={`desc-${champion.id}-${ability.key}-${i}`}>
 														{desc.replace(/<\/?[\w\s="'#]+>/g, '')}
 													</p>
 													{arr.length !== i && <br />}

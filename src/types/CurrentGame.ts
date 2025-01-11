@@ -10,6 +10,7 @@ export type PlayerData = {
 
 export type CurrentGame = {
 	myRiotId: string;
+	opponentRiotId: string;
 	teams: {
 		blue: PlayerData[];
 		red: PlayerData[];

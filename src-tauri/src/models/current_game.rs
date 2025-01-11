@@ -1,8 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
 pub struct CurrentGameData {
     pub my_riot_id: String,
+    pub opponent_riot_id: String,
     pub teams: Teams,
 }
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq)]

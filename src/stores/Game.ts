@@ -1,5 +1,6 @@
-import { create } from 'zustand';
 import type { CurrentGame } from '@/types/CurrentGame';
+import { isEqual } from 'lodash';
+import { create } from 'zustand';
 
 interface GameState {
 	currentGame: CurrentGame | null;
@@ -7,9 +8,13 @@ interface GameState {
 	clearCurrentGame: () => void;
 }
 
-const useGameStore = create<GameState>()((set) => ({
+const useGameStore = create<GameState>()((set, get) => ({
 	currentGame: null,
-	setCurrentGame: (game) => set({ currentGame: game }),
+	setCurrentGame: (game) => {
+		const prevState = get();
+		if (isEqual(prevState.currentGame, game)) return;
+		set({ currentGame: game });
+	},
 	clearCurrentGame: () => set({ currentGame: null }),
 }));
 

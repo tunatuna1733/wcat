@@ -1,13 +1,22 @@
-import useGameStore from '@/stores/Game';
-import PlayerChampion from './PlayerChampion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import useGameStore from '@/stores/Game';
+import { useEffect, useState } from 'react';
+import PlayerChampion from './PlayerChampion';
 
 const LiveGame = () => {
 	const { currentGame } = useGameStore();
 
+	const [currentUser, setCurrentUser] = useState('');
+
+	useEffect(() => {
+		if (currentGame) {
+			setCurrentUser(currentGame.opponentRiotId);
+		}
+	}, [currentGame]);
+
 	return currentGame ? (
 		<>
-			<Tabs className="w-full flex flex-col">
+			<Tabs value={currentUser} onValueChange={setCurrentUser} className="w-full flex flex-col">
 				<div className="flex items-center bg-blue-200 dark:bg-blue-950 rounded-lg p-3 mb-3 w-full">
 					<TabsList className="w-full flex-1 justify-between bg-transparent">
 						{currentGame.teams.blue.map((b) => (

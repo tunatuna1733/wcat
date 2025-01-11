@@ -7,7 +7,8 @@ use crate::{
     models::{
         champion::{ChampionSummaryData, RawChampionData},
         current_game::{
-            AllGameData, ChampionData, CurrentGameData, Passive, PlayerData, Spell, Team, Teams,
+            AllGameData, ChampionData, CurrentGameData, Lane, Passive, PlayerData, Spell, Team,
+            Teams,
         },
     },
 };
@@ -89,7 +90,7 @@ impl ApiClient {
     pub async fn get_current_game(&self, lang: &str) -> Result<CurrentGameData, ApplicationError> {
         let data = match self
             .client
-            .get("https://127.0.0.1:2999/liveclientdata/allgamedata")
+            .get("http://127.0.0.1:2999/liveclientdata/allgamedata")
             .send()
             .await
         {
@@ -201,11 +202,15 @@ impl ApiClient {
     ) -> Result<CurrentGameData, ApplicationError> {
         if let Some(ref champions) = self.champions {
             let my_riot_id = data.active_player.riot_id;
+            let mut my_position = Lane::None;
             let mut blue = Vec::<PlayerData>::new();
             let mut red = Vec::<PlayerData>::new();
             for player in data.all_players.iter() {
                 let riot_id = player.riot_id.clone();
                 let position = player.position.clone();
+                if riot_id == my_riot_id {
+                    my_position = position.clone();
+                }
                 let champion_id = if player.raw_champion_name.starts_with("Character_") {
                     player
                         .raw_champion_name
@@ -246,11 +251,21 @@ impl ApiClient {
                 }
             }
 
+            let opponent_riot_id = match data
+                .all_players
+                .iter()
+                .find(|p| p.riot_id != my_riot_id && p.position == my_position)
+            {
+                Some(player) => player.riot_id.clone(),
+                None => "".to_string(),
+            };
+
             blue.sort_by_key(|p| p.position.get_sort_order());
             red.sort_by_key(|p| p.position.get_sort_order());
 
             let formatted_data = CurrentGameData {
                 my_riot_id,
+                opponent_riot_id,
                 teams: Teams { blue, red },
             };
 
